@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Multi Platform Access</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            padding: 20px;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 45px 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: translateY(0);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Sound Indicator */
+        .sound-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            opacity: 0.6;
+            transition: all 0.3s;
+        }
+
+        .sound-indicator.playing {
+            opacity: 1;
+            background: #4caf50;
+            color: white;
+            animation: pulse 0.5s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            width: 75px;
+            height: 75px;
+            background: linear-gradient(45deg, #ff0050, #00f2ea);
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(255, 0, 80, 0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .logo h1 {
+            margin-top: 15px;
+            font-size: 26px;
+            color: #161823;
+            font-weight: 700;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #ff0050;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(255, 0, 80, 0.1);
+        }
+
+        .form-group input.error,
+        .form-group select.error {
+            border-color: #d32f2f;
+            background: #fff5f5;
+        }
+
+        .form-group input.success,
+        .form-group select.success {
+            border-color: #4caf50;
+            background: #f5fff5;
+        }
+
+        .form-group input::placeholder {
+            color: #aaa;
+        }
+
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+            padding-right: 45px;
+        }
+
+        .destination-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .destination-label::before {
+            content: '🎯';
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 18px;
+            pointer-events: none;
+        }
+
+        .error-message {
+            background: #ffe6e6;
+            color: #d32f2f;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            border-left: 4px solid #d32f2f;
+            animation: shake 0.5s ease;
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(90deg, #ff0050 0%, #ff2b6e 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 0, 80, 0.3);
+            position: relative;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 0, 80, 0.4);
+        }
+
+        .login-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .login-btn:hover::after {
+            left: 100%;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .forgot-password a {
+            color: #764ba2;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .forgot-password a:hover {
+            color: #ff0050;
+            text-decoration: underline;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #ddd, transparent);
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            color: #999;
+            font-size: 13px;
+            position: relative;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            animation: modalSlide 0.3s ease;
+            position: relative;
+        }
+
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .modal-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #999;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-btn:hover {
+            color: #333;
+            background: #f0f0f0;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+
+        .modal-input.error {
+            border-color: #d32f2f;
+            background: #fff5f5;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .modal-message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-message.error {
+            display: block;
+            background: #ffe6e6;
+            color: #d32f2f;
+        }
+
+        .modal-message.success {
+            display: block;
+            background: #e6f7e6;
+            color: #2e7d32;
+        }
+
+        .loading {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .login-btn.loading-active .btn-text {
+            display: none;
+        }
+
+        .login-btn.loading-active .loading {
+            display: block;
+        }
+
+        .success-check {
+            display: none;
+            color: #4caf50;
+            font-size: 60px;
+            text-align: center;
+            animation: scaleIn 0.3s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        .redirect-info {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .redirect-info.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .redirect-info p {
+            color: #1976d2;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 30px 20px;
+            }
+            
+            .logo-icon {
+                width: 65px;
+                height: 65px;
+                font-size: 32px;
+            }
+            
+            .logo h1 {
+                font-size: 22px;
+            }
+
+            .modal-content {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Card -->
+    <div class="login-card">
+        <!-- Sound Indicator -->
+        <div class="sound-indicator" id="soundIndicator" title="Sound FX">🔊</div>
+
+        <div class="logo">
+            <div class="logo-icon">🚀</div>
+            <h1>Multi Platform Login</h1>
+            <p>Akses konten favorit Anda</p>
+        </div>
+
+        <div class="error-message" id="errorMsg">
+            <span>⚠️</span>
+            <span id="errorText">Error message</span>
+        </div>
+
+        <form id="loginForm" onsubmit="return handleLogin(event)">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        placeholder="Masukkan username"
+                        autocomplete="off"
+                    >
+                    <span class="input-icon">👤</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Masukkan password"
+                    >
+                    <span class="input-icon">🔒</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="destination" class="destination-label">Pilih tujuan setelah login:</label>
+                <div class="input-wrapper">
+                    <select id="destination" name="destination">
+                        <option value="https://www.tiktok.com" selected>🎵 TikTok</option>
+                        <option value="https://www.youtube.com">📺 YouTube</option>
+                        <option value="https://www.snackvideo.com">🍿 Snack Video</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                <span class="btn-text">Masuk</span>
+                <div class="loading"></div>
+            </button>
+        </form>
+
+        <div class="success-check" id="successCheck">✓</div>
+
+        <div class="redirect-info" id="redirectInfo">
+            <p>Mengarahkan ke <span id="platformName">platform</span>...</p>
+        </div>
+
+        <div class="forgot-password">
+            <a onclick="openModal()">Lupa Password?</a>
+        </div>
+
+        <div class="divider">
+            <span>atau</span>
+        </div>
+
+        <p style="text-align: center; color: #666; font-size: 13px;">
+            Belum punya akun? <a href="#" style="color: #ff0050; text-decoration: none; font-weight: 600;">Daftar sekarang</a>
+        </p>
+    </div>
+
+    <!-- Modal Lupa Password -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            
+            <div class="modal-header">
+                <h2>🔐 Reset Password</h2>
+                <p>Masukkan password khusus untuk reset:</p>
+            </div>
+
+            <input 
+                type="password" 
+                id="resetCode" 
+                class="modal-input" 
+                placeholder="Masukkan kode reset"
+                onkeypress="if(event.key === 'Enter') verifyReset()"
+            >
+
+            <button class="modal-btn" onclick="verifyReset()">Verifikasi</button>
+
+            <div class="modal-message" id="modalMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        // ===== WEB AUDIO API - SOUND FX =====
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let soundEnabled = false;
+
+        // Enable sound on first user interaction (browser policy)
+        function enableSound() {
+            if (!soundEnabled) {
+                audioContext.resume();
+                soundEnabled = true;
+            }
+        }
+
+        // Visual indicator for sound
+        function showSoundIndicator() {
+            const indicator = document.getElementById('soundIndicator');
+            indicator.classList.add('playing');
+            setTimeout(() => indicator.classList.remove('playing'), 500);
+        }
+
+        // Play tone with frequency, duration, and type
+        function playTone(frequency, duration, type = 'sine', volume = 0.3) {
+            if (!soundEnabled) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+            
+            showSoundIndicator();
+        }
+
+        // Specific sound effects
+        const sounds = {
+            welcome: () => {
+                // Ascending arpeggio - friendly welcome
+                playTone(523.25, 0.1, 'sine', 0.2); // C5
+                setTimeout(() => playTone(659.25, 0.1, 'sine', 0.2), 100); // E5
+                setTimeout(() => playTone(783.99, 0.2, 'sine', 0.2), 200); // G5
+            },
+            
+            success: () => {
+                // High pitched happy chord
+                playTone(880, 0.1, 'sine', 0.3); // A5
+                setTimeout(() => playTone(1108.73, 0.2, 'sine', 0.3), 100); // C#6
+                setTimeout(() => playTone(1318.51, 0.3, 'sine', 0.3), 200); // E6
+            },
+            
+            error: () => {
+                // Low, dissonant sound
+                playTone(150, 0.3, 'sawtooth', 0.3); // Low D3
+                setTimeout(() => playTone(100, 0.4, 'sawtooth', 0.3), 150); // Lower G2
+            },
+            
+            click: () => {
+                // Short high ping
+                playTone(1200, 0.08, 'sine', 0.15);
+            },
+            
+            resetSuccess: () => {
+                // Gentle ascending
+  
